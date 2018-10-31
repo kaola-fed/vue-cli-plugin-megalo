@@ -1,6 +1,6 @@
 {
   "name": "vue-cli-plugin-megalo",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "vue cli plugin for megalo",
   "main": "index.js",
   "scripts": {
