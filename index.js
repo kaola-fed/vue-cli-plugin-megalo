@@ -1,9 +1,9 @@
 const createMegaloTarget = require('@megalo/target');
 const compiler = require('@megalo/template-compiler');
 const path = require('path');
-const _ = require('./util');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const cliServicePath = path.dirname(require.resolve('@vue/cli-service'))
+const octoparsePath = path.dirname(require.resolve('octoparse'))
 const WriteFileWebpackPlugin = require('write-file-webpack-plugin');
 
 module.exports = (api, options) => {
@@ -23,7 +23,7 @@ module.exports = (api, options) => {
       Object.assign(targetOptions, {
         htmlParse: {
           templateName: 'octoParse',
-          src: _.resolve(`./node_modules/octoparse/lib/platform/${platform}`)
+          src: `${octoparsePath}/lib/platform/${platform}`
         }
       })
     }
@@ -40,7 +40,6 @@ module.exports = (api, options) => {
 
       .resolve.alias
         .set('vue$', 'megalo')
-        .set('@', _.resolve('src'))
         .end();
 
     webpackConfig
