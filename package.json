@@ -1,6 +1,6 @@
 {
   "name": "vue-cli-plugin-megalo",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "vue cli plugin for megalo",
   "main": "index.js",
   "scripts": {
@@ -14,8 +14,7 @@
   "files": [
     "prompts.js",
     "generators.js",
-    "index.js",
-    "util.js"
+    "index.js"
   ],
   "author": "kaola-fed",
   "license": "MIT",
