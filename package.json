@@ -23,11 +23,12 @@
     "@megalo/target": "^0.1.0",
     "@megalo/template-compiler": "^0.1.2",
     "@vue/cli-service": "^3.0.5",
-    "babel-core": "6",
+    "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
     "babel-preset-env": "^1.7.0",
     "copy-webpack-plugin": "^4.5.2",
     "mini-css-extract-plugin": "^0.4.1",
+    "octoparse": "^0.1.11",
     "webpack": "^4",
     "write-file-webpack-plugin": "^4.4.1"
   }

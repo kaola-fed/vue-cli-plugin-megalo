@@ -1,3 +1,5 @@
+const createMegaloTarget = require('@megalo/target');
+const compiler = require('@megalo/template-compiler');
 const path = require('path');
 const _ = require('./util');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
@@ -5,9 +7,31 @@ const cliServicePath = path.dirname(require.resolve('@vue/cli-service'))
 const WriteFileWebpackPlugin = require('write-file-webpack-plugin');
 
 module.exports = (api, options) => {
+  const megaloPluginOptions = options.pluginOptions.megalo;
   const isProduction = process.env.NODE_ENV !== 'production';
+  const { platform, useVhtml } = megaloPluginOptions;
 
   api.chainWebpack(webpackConfig => {
+    console.log(`[vue-cli-plugin-megalo]: building platform ${platform}`)
+    const targetOptions = {
+      compiler,
+      platform
+    };
+
+    if (useVhtml) {
+      console.log('[vue-cli-plugin-megalo]: using vhtml')
+      Object.assign(targetOptions, {
+        htmlParse: {
+          templateName: 'octoParse',
+          src: _.resolve(`./node_modules/octoparse/lib/platform/${platform}`)
+        }
+      })
+    }
+
+    webpackConfig.target(
+      createMegaloTarget(targetOptions)
+    )
+
     webpackConfig
       .output
         .filename('static/js/[name].js')
