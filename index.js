@@ -1,9 +1,12 @@
 const path = require('path');
 const _ = require('./util');
-const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' )
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const cliServicePath = path.dirname(require.resolve('@vue/cli-service'))
+const WriteFileWebpackPlugin = require('write-file-webpack-plugin');
 
 module.exports = (api, options) => {
+  const isProduction = process.env.NODE_ENV !== 'production';
+
   api.chainWebpack(webpackConfig => {
     webpackConfig
       .output
@@ -15,6 +18,10 @@ module.exports = (api, options) => {
         .set('vue$', 'megalo')
         .set('@', _.resolve('src'))
         .end();
+
+    webpackConfig
+      .devtool(false)
+      .watch(!isProduction);
 
     webpackConfig
       .optimization 
@@ -29,26 +36,32 @@ module.exports = (api, options) => {
         });
 
 
-    webpackConfig.plugins.delete('hmr');
+    webpackConfig
+      .plugins
+        .delete('hmr')
+        .delete('no-emit-on-errors')
+        .delete('preload')
+        .delete('prefetch')
+        .delete('html');
 
     webpackConfig.module
       .rule('vue')
         .test(/\.vue$/)
         .use('vue-loader')
           .loader('vue-loader')
-          .options({
-          })
-
+          .options({});
 
     webpackConfig
       .plugin('extract-css')
-      .tap(args => {
-        console.log(args)
-        return [{
-          chunkFilename: `./static/css/[name].wxss`,
-          filename: `./static/css/[name].wxss`,
-        }];
-      })
+        .tap(args => {
+          return [{
+            chunkFilename: `./static/css/[name].wxss`,
+            filename: `./static/css/[name].wxss`,
+          }];
+        })
+        .end()
+      .plugin('wrtie-file')
+        .use(WriteFileWebpackPlugin)
        
   })
 
@@ -82,32 +95,51 @@ module.exports = (api, options) => {
             return /node_modules/.test(filepath)
           })
           .end()
-        // .use('cache-loader')
-        //   .loader('cache-loader')
-        //   .options(api.genCacheConfig('babel-loader', {
-        //     '@babel/core': require('@babel/core/package.json').version,
-        //     '@vue/babel-preset-app': require('@vue/babel-preset-app/package.json').version,
-        //     'babel-loader': require('babel-loader/package.json').version,
-        //     modern: !!process.env.VUE_CLI_MODERN_BUILD,
-        //     browserslist: api.service.pkg.browserslist
-        //   }, [
-        //     'babel.config.js',
-        //     '.browserslistrc'
-        //   ]))
-        //   .end()
+    //     .use('cache-loader')
+    //       .loader('cache-loader')
+    //       .options(api.genCacheConfig('babel-loader', {
+    //         '@babel/core': require('@babel/core/package.json').version,
+    //         '@vue/babel-preset-app': require('@vue/babel-preset-app/package.json').version,
+    //         'babel-loader': require('babel-loader/package.json').version,
+    //         modern: !!process.env.VUE_CLI_MODERN_BUILD,
+    //         browserslist: api.service.pkg.browserslist
+    //       }, [
+    //         'babel.config.js',
+    //         '.browserslistrc'
+    //       ]))
+    //       .end()
 
     jsRule
       .use('babel-loader')
         .loader('babel-loader')
   })
 
-  api.configureWebpack(webpackConfig => {
-    // 修改 webpack 配置
-    // 或返回通过 webpack-merge 合并的配置对象
-    console.log(webpackConfig.entry)
-  })
+  api.registerCommand('dev', {
+    description: 'build for dev',
+    usage: 'vue-cli-service build [options] [entry|pattern]',
+    options: {
+      '--watch': `watch for changes`
+    }
+  }, async (args) => {
+    const webpack = require('webpack')
+    const webpackConfig = api.resolveWebpackConfig()
+    webpackConfig.watch = true
+    await build();
 
-  // api.registerCommand('test', args => {
-  //   // 注册 `vue-cli-service test`
-  // })
+    async function build() {
+      return new Promise( (resolve, reject ) => {
+        webpack(webpackConfig, ( err, stats ) => {
+          if (err) {
+            return reject( err )
+          }
+
+          if (stats.hasErrors()) {
+            return reject('build error')
+          }
+
+          resolve();
+        } )
+      } )
+    }
+  } )
 }
